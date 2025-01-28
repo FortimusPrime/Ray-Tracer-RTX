@@ -139,7 +139,7 @@ void render(Scene scene, Vector3D cameraOrigin){
         // We could have a tensor, that is a 2D matrix which would represent each point in the canvas, and it would be assigned it's index. 
         // That way, after the parallel operation, we could "paint" on the canvas 
 
-    #pragma omp parallel for
+    // #pragma omp parallel for
     for (int x = -CanvasWidth/2; x < CanvasWidth/2; x++){
         for (int y = -CanvasHeight/2; y < CanvasHeight/2; y++){
             Vector3D D = CanvasToViewport(y, -x, ViewportWidth, ViewportHeight, CanvasWidth, CanvasHeight, distance_viewport_camera); // NOTE, the second value is 0, when in Python it's 0.5 
@@ -151,14 +151,14 @@ void render(Scene scene, Vector3D cameraOrigin){
             // Since values tend to go to the negatives, we add the offset to map correctly to the map2D 
             map2D[y + CanvasHeight/2][x + CanvasWidth/2] = colorToMap;
             
-            #pragma omp atomic
+            // #pragma omp atomic
             // Increase the progress
             current ++;
             progress = int((current/whole)*100);
 
         }
         
-        #pragma omp critical
+        // #pragma omp critical
         // Cout the progress if there has been a change in percentage. 
         if (progress != prev){
             cout << "Loading... " << progress << "% done." << endl;

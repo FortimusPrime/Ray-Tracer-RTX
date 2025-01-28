@@ -1,5 +1,6 @@
 # Compiler and flags
-CXX = g++
+CXX = g++ 
+# g++
 CXXFLAGS = -Wall -g
 
 # List of source files and object files
@@ -17,7 +18,7 @@ OBJ = $(SRC:.cpp=.o)
 
 # Target executable
 animation_program: $(OBJ)
-	$(CXX) $(CXXFLAGS) -o animation_program $(OBJ)
+	$(CXX) $(CXXFLAGS) -o Ray_Tracing_RTX $(OBJ)
 	rm -f *.o
 	rm -f */*.o
 
@@ -28,3 +29,9 @@ animation_program: $(OBJ)
 clean:
 	rm -f *.o
 	rm -f */*.o
+
+run: $(OBJ)
+	$(CXX) $(CXXFLAGS) -o Ray_Tracing_RTX $(OBJ)
+	rm -f *.o
+	rm -f */*.o
+	./Ray_Tracing_RTX

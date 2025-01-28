@@ -223,12 +223,12 @@ Vector3D TraceRay(Vector3D cameraOrigin, Vector3D D, double t_min, int t_max, in
 
     array<double, 2> closest_ts = ClosestIntersection(cameraOrigin, D, t_min, t_max, scene);
     double closest_object_index = closest_ts[0];
-    Primitive closest_object = scene.getObjects()[closest_object_index];
 
     double closest_t = closest_ts[1];
     if (closest_object_index == -1) {
         return background_color;
     }
+    Primitive closest_object = scene.getObjects()[closest_object_index];
 
     // Return the color of the closest sphere
     Vector3D P = cameraOrigin + (D * closest_t);  // Compute intersection
@@ -247,6 +247,7 @@ Vector3D TraceRay(Vector3D cameraOrigin, Vector3D D, double t_min, int t_max, in
     
     Vector3D reflected_color = TraceRay(P, R, 0.001, 2147483647, recursion_depth - 1, scene, background_color);
     return local_color * (1 - r) + reflected_color * r;
+    // return Vector3D(1, 1, 1);
 
 }
 

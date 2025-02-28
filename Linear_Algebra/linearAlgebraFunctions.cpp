@@ -9,10 +9,9 @@ Vector3D getCrossProduct(Vector3D a, Vector3D b) {
 
 double generateRandomNumber(double min, double max) {
   // Set up random number generator
-  random_device rd;   // Seed
-  mt19937 gen(rd());  // Mersenne Twister engine for generating random numbers
-  uniform_int_distribution<> distrib(
-      min, max);  // Uniform distribution within [min, max]
+  random_device rd;                              // Seed
+  mt19937 gen(rd());                             // Mersenne Twister engine for generating random numbers
+  uniform_int_distribution<> distrib(min, max);  // Uniform distribution within [min, max]
 
   // Generate a random number within the range [min, max]
   double random_number = distrib(gen);
@@ -32,13 +31,15 @@ Vector3D ColorMax(Vector3D color) {
   return newColor;
 }
 
+/**
+ * @brief Returns a 360 Vector3D Array with hard-coded Vector3D coordinates for spinning primitives.
+ *
+ * @return array<Vector3D, 360> Vector3D coordinates for spinning primitives.
+ */
 array<Vector3D, 360> circleCoordinates() {
   array<Vector3D, 360> list;
-  double x;
-  double y;
-  int angle;
-  double rads;
-  for (angle = 0; angle < 360; angle++) {
+  double x, y, rads;
+  for (int angle = 0; angle < 360; angle++) {
     rads = angle * (3.14 / 180);
     x = std::cos(rads);
     y = std::sin(rads);
@@ -53,19 +54,9 @@ Matrix3D getRotationMatrix(double angleA, double angleB, double angleR) {
   double angleAlpha = degreesToRadians(angleA);
   double angleBeta = degreesToRadians(angleB);
   double anglePhi = degreesToRadians(angleR);
-  Vector3D vect1 =
-      Vector3D(cos(angleBeta) * cos(anglePhi), cos(angleBeta) * sin(anglePhi),
-               sin(angleBeta) * -1);
-  Vector3D vect2 = Vector3D(sin(angleAlpha) * sin(angleBeta) * cos(anglePhi) -
-                                cos(angleAlpha) * sin(anglePhi),
-                            sin(angleAlpha) * sin(angleBeta) * sin(anglePhi) +
-                                cos(angleAlpha) * cos(anglePhi),
-                            sin(angleAlpha) * cos(angleBeta));
-  Vector3D vect3 = Vector3D(cos(angleAlpha) * sin(angleBeta) * cos(anglePhi) +
-                                sin(angleAlpha) * sin(anglePhi),
-                            cos(angleAlpha) * sin(angleBeta) * sin(anglePhi) -
-                                sin(angleAlpha) * cos(anglePhi),
-                            cos(angleAlpha) * cos(angleBeta));
+  Vector3D vect1 = Vector3D(cos(angleBeta) * cos(anglePhi), cos(angleBeta) * sin(anglePhi), sin(angleBeta) * -1);
+  Vector3D vect2 = Vector3D(sin(angleAlpha) * sin(angleBeta) * cos(anglePhi) - cos(angleAlpha) * sin(anglePhi), sin(angleAlpha) * sin(angleBeta) * sin(anglePhi) + cos(angleAlpha) * cos(anglePhi), sin(angleAlpha) * cos(angleBeta));
+  Vector3D vect3 = Vector3D(cos(angleAlpha) * sin(angleBeta) * cos(anglePhi) + sin(angleAlpha) * sin(anglePhi), cos(angleAlpha) * sin(angleBeta) * sin(anglePhi) - sin(angleAlpha) * cos(anglePhi), cos(angleAlpha) * cos(angleBeta));
   Matrix3D rotationMatrix = Matrix3D(vect1, vect2, vect3);
   return rotationMatrix;
 }

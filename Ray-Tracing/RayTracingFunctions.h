@@ -1,20 +1,39 @@
+#ifndef RAYTRACINGFUNCTIONS_H
+#define RAYTRACINGFUNCTIONS_H
+
+#include <array>
 
 #include "../Linear_Algebra/Vector3D.h"
+#include "../Objects/Light.h"
 #include "../Objects/Primitive.h"
 #include "../Objects/Scene.h"
-#include "../Objects/Light.h"
 #include "../Objects/derivedObjects.h"
-#include <array>
-// Reflecting rays. 
+
+#define INF 2147483647
+#define RECURSION_DEPTH 5
+
+struct Config {
+  // Viewport Dims
+  int ViewportWidth;
+  int ViewportHeight;
+
+  // Canvas Dims
+  int CanvasWidth;
+  int CanvasHeight;
+
+  double distance_viewport_camera = 1;
+};
+
+// Reflecting rays.
 Vector3D reflectRay(Vector3D R, Vector3D N);
 
-// Check if point in plane is within the parameters of the triangle. 
+// Check if point in plane is within the parameters of the triangle.
 bool pointInTriangle(const Vector3D &P, Primitive triangle);
 
 // Closest Intersection for Triangles
 array<double, 2> IntersectRayTriangle(Vector3D O, Vector3D D, Primitive triangle);
 
-// Closest intersection for spheres. 
+// Closest intersection for spheres.
 array<double, 2> IntersectRaySphere(Vector3D O, Vector3D D, Primitive sphere);
 
 // Compute the closest Intersection
@@ -29,4 +48,6 @@ Vector3D TraceRay(Vector3D cameraOrigin, Vector3D D, double t_min, int t_max, in
 // Canvas to Viewport Transformations
 Vector3D CanvasToViewport(double x, double y, int ViewportWidth, int ViewportHeight, int CanvasWidth, int CanvasHeight, int distance_viewport_camera);
 
-Scene makeScene();
+vector<vector<string>> render(Scene scene, Vector3D cameraOrigin, Config &config);
+
+#endif  // RAYTRACINGFUNCTIONS_H

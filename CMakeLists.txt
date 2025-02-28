@@ -70,6 +70,7 @@ add_executable(${CMAKE_PROJECT_NAME}
     Objects/Light.cpp 
     Objects/Primitive.cpp 
     Objects/Scene.cpp 
+    Objects/Camera.cpp 
     Misc/miscFunctions.cpp
     Ray-Tracing/RayTracingFunctions.cpp
 )

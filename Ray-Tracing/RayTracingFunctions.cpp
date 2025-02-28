@@ -42,7 +42,7 @@ Vector3D reflectRay(Vector3D R, Vector3D N) {
 //     return false;
 // }
 
-bool pointInTriangle(const Vector3D &P, Primitive triangle) {
+bool pointInTriangle(const Vector3D& P, Primitive triangle) {
   Vector3D A = triangle.getPointA();
   Vector3D B = triangle.getPointB();
   Vector3D C = triangle.getPointC();
@@ -242,35 +242,44 @@ Vector3D TraceRay(Vector3D cameraOrigin, Vector3D D, double t_min, int t_max, in
 
   Vector3D reflected_color = TraceRay(P, R, 0.001, 2147483647, recursion_depth - 1, scene, background_color);
   return local_color * (1 - r) + reflected_color * r;
-  // return Vector3D(1, 1, 1);
 }
 
-Vector3D CanvasToViewport(double x, double y, int ViewportWidth, int ViewportHeight, int CanvasWidth, int CanvasHeight, int distance_viewport_camera) {
-  Vector3D result = Vector3D(x * ViewportWidth / CanvasWidth, y * ViewportHeight / CanvasHeight, distance_viewport_camera);
+/**
+ * @brief Returns ray to be "shot" from camera. Essentially determines which square on the viewport corresponds to the pixel (x, y)
+ *
+ * @param x x coordinate of the pixel on the grid.
+ * @param y y coordinate of the pixel on the grid.
+ * @param camera Camera object that contains the information.
+ * @return Vector3D Ray that is "shot" from the camera into the scene.
+ */
+Vector3D CanvasToViewport(double x, double y, Camera& camera) {
+  Vector3D result = Vector3D(x * camera.getViewportWidth() / camera.getCanvasWidth(), y * camera.getViewportHeight() / camera.getCanvasHeight(), camera.getDistanceViewportCamera());
   return result;
 }
 
-vector<vector<string>> render(Scene scene, Vector3D cameraOrigin, Config &config) {
-  vector<vector<string>> map2D(config.CanvasHeight, vector<string>(config.CanvasWidth));
+/**
+ * @brief Renders scene that is passed as parameter, using the camera object configurations.
+ *
+ * @param scene Scene to be rendered.
+ * @param camera Camera object from which scene will be rendered.
+ * @return vector<vector<string>> 2D Vector that stores strings of the values of the scene rendered.
+ */
+vector<vector<string>> render(Scene& scene, Camera& camera) {
+  vector<vector<string>> map2D(camera.getCanvasHeight(), vector<string>(camera.getCanvasWidth()));
   string colorToMap;
   cout << "Engaging render" << endl;
   // My idea:
-  // We could have a tensor, that is a 2D matrix which would represent each
-  // point in the canvas, and it would be assigned it's index. That way, after
+  // We could have a tensor, that is a 2D matrix which would represent each point in the canvas, and it would be assigned it's index. That way, after
   // the parallel operation, we could "paint" on the canvas
-
-  for (int x = -config.CanvasWidth / 2; x < config.CanvasWidth / 2; x++) {
-    // #pragma omp parallel for
-    for (int y = -config.CanvasHeight / 2; y < config.CanvasHeight / 2; y++) {
-      Vector3D D = CanvasToViewport(y, -x, config.ViewportWidth, config.ViewportHeight, config.CanvasWidth, config.CanvasHeight, config.distance_viewport_camera);  // NOTE, the second value is 0, when in Python it's 0.5
-      D = D / D.magnitude();
-      Vector3D color = TraceRay(cameraOrigin, D, double(config.distance_viewport_camera), INF, RECURSION_DEPTH, scene, scene.BACKGROUND_COLOR);
+  // #pragma omp parallel for
+  for (int x = -camera.getCanvasWidth() / 2; x < camera.getCanvasWidth() / 2; x++) {
+    for (int y = -camera.getCanvasHeight() / 2; y < camera.getCanvasHeight() / 2; y++) {
+      Vector3D rayShot = CanvasToViewport(y, -x, camera);
+      rayShot = rayShot / rayShot.magnitude();
+      Vector3D color = TraceRay(camera.getCameraOrigin(), rayShot, camera.getDistanceViewportCamera(), INF, RECURSION_DEPTH, scene, scene.BACKGROUND_COLOR);
       color = ColorMax(color);
-      // colorToMap is the temporary which will take the color and map it to the map2D
-      colorToMap = to_string(int(color.getX())) + " " + to_string(int(color.getY())) + " " + to_string(int(color.getZ())) + "   ";
-      // Since values tend to go to the negatives, we add the offset to map
-      // correctly to the map2D
-      map2D[y + config.CanvasHeight / 2][x + config.CanvasWidth / 2] = colorToMap;
+      colorToMap = to_string(int(color.getX())) + " " + to_string(int(color.getY())) + " " + to_string(int(color.getZ())) + "   ";  // colorToMap is the temporary which will take the color and map it to the map2D
+      map2D[y + camera.getCanvasHeight() / 2][x + camera.getCanvasWidth() / 2] = colorToMap;                                        // Since values tend to go to the negatives, we add the offset to map correctly to the map2D
     }
   }
   return map2D;

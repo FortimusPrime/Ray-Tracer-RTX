@@ -12,3 +12,5 @@ void Scene::setLights(vector<Light> lights) { this->lights = lights; }
 vector<Primitive> Scene::getObjects() { return this->objects; }
 
 vector<Light> Scene::getLights() { return this->lights; }
+
+Vector3D Scene::getBackgroundColor() { return this->BACKGROUND_COLOR; }

@@ -1,14 +1,16 @@
 #include "derivedObjects.h"
-array<Primitive, 4> buildTetrahedron(Vector3D color, Vector3D pointA, Vector3D pointB, Vector3D pointC, Vector3D pointD, int specular, double reflective) {
-  Primitive t1 = Primitive(Vector3D(255, 0, 0), pointA, pointB, pointC, specular, reflective);
-  Primitive t2 = Primitive(Vector3D(0, 255, 0), pointA, pointC, pointD, specular, reflective);
-  Primitive t3 = Primitive(Vector3D(0, 0, 255), pointA, pointD, pointB, specular, reflective);
-  Primitive t4 = Primitive(Vector3D(255, 255, 0), pointB, pointC, pointD, specular, reflective);
 
-  array<Primitive, 4> triangles = {t1, t2, t3, t4};
-  return triangles;
-}
-
+/**
+ * @brief Generates an array of triangles that form a tetrahedron at the center specified with the color specified.
+ *
+ * @param color Color of the tetrahedron (if tetrahedron is coded with it)
+ * @param center Vector3D center of the tetrahedron specified.
+ * @param width This goes in all directions; height, width, and length, can be decimal.
+ * @param specular Self-explanatory.
+ * @param reflective From 0 to 1.
+ * @param angleInput Angle to apply to hard-coded rotation matrix.
+ * @return array<Primitive, 4> Array of primitive triangles that form a tetrahedron.
+ */
 array<Primitive, 4> buildTetrahedron2(Vector3D color, Vector3D center, double width, int specular, double reflective, double angleInput) {
   Matrix3D rotationMatrix = getRotationMatrix(angleInput * 1, angleInput * 2, angleInput * 3);
 
@@ -26,6 +28,15 @@ array<Primitive, 4> buildTetrahedron2(Vector3D color, Vector3D center, double wi
   return triangles;
 }
 
+/**
+ * @brief Generates an array of triangles that form a cube at the center specified with the color specified.
+ *
+ * @param center Vector3D center of the cube specified.
+ * @param width This goes in all directions; height, width, and length, can be decimal.
+ * @param color Color of the cube.
+ * @param angleInput Angle to apply to hard-coded rotation matrix.
+ * @return array<Primitive, 12> Array of primitive triangles that form a cube.
+ */
 array<Primitive, 12> buildCube(Vector3D center, double width, Vector3D color, double angleInput) {
   Matrix3D rotationMatrix = getRotationMatrix(angleInput * -1, angleInput * -2, angleInput * -1.5);
 

@@ -23,7 +23,7 @@ using namespace std;
 
 int main() {
   timespec startTime = getTime();  // To profile time.
-  Camera camera = Camera(1, Vector3D(0, 0, 1), 1, 1, 100, 100);
+  Camera camera = Camera(1, Vector3D(0, 0, 1), 1, 1, 800, 800);
   Vector3D BACKGROUND_COLOR = Vector3D(0, 255, 255);  // Cyan
   double x_real = 0.0, y_real = 0.0, z_real = 1.0;    // Coordinates for camera. Initialized to 0.0 and 1.0 as the center.
   string fileName;

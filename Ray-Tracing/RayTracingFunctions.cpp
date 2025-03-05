@@ -42,6 +42,14 @@ Vector3D reflectRay(Vector3D R, Vector3D N) {
 //     return false;
 // }
 
+/**
+ * @brief Function to check if ray "shot" intersects within the bounds of the triangle defined in the plane triangle.
+ *
+ * @param P Point of intersection on plane.
+ * @param triangle Plane to intersect.
+ * @return true If vector-plane intersection is within triangle bounds.
+ * @return false If vector-plane intersection is not within triangle bounds.
+ */
 bool pointInTriangle(const Vector3D& P, Primitive triangle) {
   Vector3D A = triangle.getPointA();
   Vector3D B = triangle.getPointB();
@@ -64,6 +72,14 @@ bool pointInTriangle(const Vector3D& P, Primitive triangle) {
   return (u >= 0) && (v >= 0) && (u + v <= 1);
 }
 
+/**
+ * @brief Obtain the points of intersection of a triangle and a ray D shot from O.
+ *
+ * @param O Origin of ray to be "shot".
+ * @param D Ray that is "shot".
+ * @param triangle triangle primitive object to calculate.
+ * @return array<double, 2>
+ */
 array<double, 2> IntersectRayTriangle(Vector3D O, Vector3D D, Primitive triangle) {
   Vector3D P0 = triangle.getPointA();
   Vector3D P1 = triangle.getPointB();
@@ -79,24 +95,24 @@ array<double, 2> IntersectRayTriangle(Vector3D O, Vector3D D, Primitive triangle
 
   double NdotD = normal * D;
   if (NdotD == 0) {
-    t1 = 2147483647;
-    t2 = 2147483647;
+    t1 = INF;
+    t2 = INF;
   }
 
   t = (normal * (P0 - O)) / NdotD;
   if (t < 0) {
-    t1 = 2147483647;
-    t2 = 2147483647;
+    t1 = INF;
+    t2 = INF;
   }
 
   Vector3D P = O + D * t;
 
   if (pointInTriangle(P, triangle)) {
     t1 = t;
-    t2 = 2147483647;
+    t2 = INF;
   } else {
-    t1 = 2147483647;
-    t2 = 2147483647;
+    t1 = INF;
+    t2 = INF;
   }
   // // If the cross product of the normal of the plane and the ray are 0, they are parallel and will never intersect.
   // // That is, if cross(D, TriangleNormal) == 0, we return the background color.
@@ -105,8 +121,8 @@ array<double, 2> IntersectRayTriangle(Vector3D O, Vector3D D, Primitive triangle
   // double t = 0.0;
 
   // if (triangle.getNormal() * D == 0){
-  //     t1 = inf;
-  //     t2 = inf;
+  //     t1 = INF;
+  //     t2 = INF;
   // }
   // else{
   //     // Now, if the triangle normal and the ray are not parallel, with maths, we need to find the intersection point. That is, T.
@@ -119,12 +135,20 @@ array<double, 2> IntersectRayTriangle(Vector3D O, Vector3D D, Primitive triangle
   //         t = -1;
   //     }
   //     t1 = t;
-  //     t2 = inf;
+  //     t2 = INF;
   // }
   array<double, 2> result = {t1, t2};  // For this case, to use the same functions for both triangles and spheres, we'll just place t in both spaces of the pair.
   return result;
 }
 
+/**
+ * @brief Obtain the points of intersection of a sphere and a ray D shot from O. This can be no intersections, one intersection, or two.
+ *
+ * @param O Origin of ray to be "shot".
+ * @param D Ray that is "shot".
+ * @param sphere Sphere object to calculate.
+ * @return array<double, 2> The points of intersection of the sphere.
+ */
 array<double, 2> IntersectRaySphere(Vector3D O, Vector3D D, Primitive sphere) {
   double r = sphere.getRadius();
   Vector3D CO = O - sphere.center;
@@ -134,7 +158,7 @@ array<double, 2> IntersectRaySphere(Vector3D O, Vector3D D, Primitive sphere) {
 
   double discriminant = b * b - 4 * a * c;
   if (discriminant < 0) {
-    array<double, 2> result = {2147483647, 2147483647};
+    array<double, 2> result = {INF, INF};
     return result;
   }
 
@@ -144,20 +168,33 @@ array<double, 2> IntersectRaySphere(Vector3D O, Vector3D D, Primitive sphere) {
   return result;
 }
 
+/**
+ * @brief Obtain the value to multiply the ray "shot" to touch the surface of the object that first intersects with the ray that was "shot".
+ *
+ * @param cameraOrigin The "back tip" of the camera.
+ * @param D Ray that wil lbe "shot", this is the base.
+ * @param t_min The closest distance from which the ray is "shot"
+ * @param t_max The max distance which the ray will "travel"
+ * @param scene Scene object which will be rendered. Needed to make calculations with the objects on the scene.
+ * @return array<double, 2>
+ */
 array<double, 2> ClosestIntersection(Vector3D cameraOrigin, Vector3D D, double t_min, double t_max, Scene scene) {
-  double closest_t = 2147483647;
-  int closest_object_index = -1;  // Use index instead of pointer
-  for (int i = 0; i < int(scene.getObjects().size()); i++) {
-    Primitive currentObject = scene.getObjects()[i];
-    array<double, 2> ts = {0, 0};
+  double closest_t = t_max;
+  double closest_object_index = -1;  // Use index instead of pointer
+  Primitive currentObject;
+  array<double, 2> ts = {0, 0};
+  double t1;
+  double t2;
+  for (int i = 0; i < int(scene.getObjects().size()); i++) {  // Loop through primitive objects in scene object.
+    currentObject = scene.getObjects()[i];
 
-    if (currentObject.getType() == "sphere") {
+    if (currentObject.getType() == "sphere") {  // Objects in scene can be either spheres or meshes of triangles.
       ts = IntersectRaySphere(cameraOrigin, D, currentObject);
     } else {
       ts = IntersectRayTriangle(cameraOrigin, D, currentObject);
     }
-    double t1 = ts[0];
-    double t2 = ts[1];
+    t1 = ts[0];
+    t2 = ts[1];
 
     if (t_min < t1 && t1 < t_max && t1 < closest_t) {
       closest_t = t1;
@@ -169,7 +206,7 @@ array<double, 2> ClosestIntersection(Vector3D cameraOrigin, Vector3D D, double t
       closest_object_index = i;  // Store the index
     }
   }
-  array<double, 2> result = {double(closest_object_index), closest_t};
+  array<double, 2> result = {closest_object_index, closest_t};
   return result;
 }
 
@@ -215,14 +252,26 @@ double ComputeLighting(Vector3D P, Vector3D N, Vector3D V, int s, Scene scene) {
   return intensity;
 }
 
-Vector3D TraceRay(Vector3D cameraOrigin, Vector3D D, double t_min, int t_max, int recursion_depth, Scene scene, Vector3D background_color) {
+/**
+ * @brief Returns the color which the ray D "points" to.
+ *
+ * @param cameraOrigin The "back tip" of the camera.
+ * @param D Ray that wil lbe "shot", this is the base.
+ * @param t_min The closest distance from which the ray is "shot"
+ * @param t_max The max distance which the ray will "travel"
+ * @param recursion_depth Limit to which reflective recursions will be called.
+ * @param scene Scene object which will be rendered. Needed to make calculations with the objects on the scene.
+ * @return Vector3D Color of pixel.
+ */
+Vector3D TraceRay(Vector3D cameraOrigin, Vector3D D, double t_min, int t_max, int recursion_depth, Scene& scene) {
   array<double, 2> closest_ts = ClosestIntersection(cameraOrigin, D, t_min, t_max, scene);
   double closest_object_index = closest_ts[0];
 
   double closest_t = closest_ts[1];
-  if (closest_object_index == -1) {
-    return background_color;
+  if (closest_object_index == -1) {  // If ray didn't "hit" anything, return the background color from the scene.
+    return scene.getBackgroundColor();
   }
+
   Primitive closest_object = scene.getObjects()[closest_object_index];
 
   // Return the color of the closest sphere
@@ -240,7 +289,7 @@ Vector3D TraceRay(Vector3D cameraOrigin, Vector3D D, double t_min, int t_max, in
 
   Vector3D R = reflectRay((D * -1), N);  // Computer the reflected color
 
-  Vector3D reflected_color = TraceRay(P, R, 0.001, 2147483647, recursion_depth - 1, scene, background_color);
+  Vector3D reflected_color = TraceRay(P, R, 0.001, 2147483647, recursion_depth - 1, scene);
   return local_color * (1 - r) + reflected_color * r;
 }
 
@@ -265,21 +314,19 @@ Vector3D CanvasToViewport(double x, double y, Camera& camera) {
  * @return vector<vector<string>> 2D Vector that stores strings of the values of the scene rendered.
  */
 vector<vector<string>> render(Scene& scene, Camera& camera) {
+  // This tensor stores the color values stored by index (x, y) by the nested for loop below.
   vector<vector<string>> map2D(camera.getCanvasHeight(), vector<string>(camera.getCanvasWidth()));
-  string colorToMap;
   cout << "Engaging render" << endl;
-  // My idea:
-  // We could have a tensor, that is a 2D matrix which would represent each point in the canvas, and it would be assigned it's index. That way, after
-  // the parallel operation, we could "paint" on the canvas
-  // #pragma omp parallel for
+#pragma omp parallel for
   for (int x = -camera.getCanvasWidth() / 2; x < camera.getCanvasWidth() / 2; x++) {
     for (int y = -camera.getCanvasHeight() / 2; y < camera.getCanvasHeight() / 2; y++) {
-      Vector3D rayShot = CanvasToViewport(y, -x, camera);
+      Vector3D rayShot = CanvasToViewport(y, -x, camera);  // In context of the book, rayShot is D.
       rayShot = rayShot / rayShot.magnitude();
-      Vector3D color = TraceRay(camera.getCameraOrigin(), rayShot, camera.getDistanceViewportCamera(), INF, RECURSION_DEPTH, scene, scene.BACKGROUND_COLOR);
+      Vector3D color = TraceRay(camera.getCameraOrigin(), rayShot, camera.getDistanceViewportCamera(), INF, RECURSION_DEPTH, scene);
       color = ColorMax(color);
-      colorToMap = to_string(int(color.getX())) + " " + to_string(int(color.getY())) + " " + to_string(int(color.getZ())) + "   ";  // colorToMap is the temporary which will take the color and map it to the map2D
-      map2D[y + camera.getCanvasHeight() / 2][x + camera.getCanvasWidth() / 2] = colorToMap;                                        // Since values tend to go to the negatives, we add the offset to map correctly to the map2D
+      string colorToMap = to_string(int(color.getX())) + " " + to_string(int(color.getY())) + " " + to_string(int(color.getZ())) + "   ";  // colorToMap is the temporary which will take the color and map it to the map2D
+#pragma omp critical
+      map2D[y + camera.getCanvasHeight() / 2][x + camera.getCanvasWidth() / 2] = colorToMap;  // Since values tend to go to the negatives, we add the offset to map correctly to the map2D
     }
   }
   return map2D;

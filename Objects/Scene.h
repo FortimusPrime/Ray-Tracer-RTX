@@ -23,6 +23,8 @@ class Scene {
   vector<Primitive> getObjects();
 
   vector<Light> getLights();
+
+  Vector3D getBackgroundColor();
 };
 
 #endif  // SCENE_H

@@ -317,6 +317,7 @@ vector<vector<string>> render(Scene& scene, Camera& camera) {
   // This tensor stores the color values stored by index (x, y) by the nested for loop below.
   vector<vector<string>> map2D(camera.getCanvasHeight(), vector<string>(camera.getCanvasWidth()));
   cout << "Engaging render" << endl;
+  omp_set_nested(1);  // Set omp to enable nested loop parallelism
 #pragma omp parallel for
   for (int x = -camera.getCanvasWidth() / 2; x < camera.getCanvasWidth() / 2; x++) {
     for (int y = -camera.getCanvasHeight() / 2; y < camera.getCanvasHeight() / 2; y++) {
@@ -325,8 +326,7 @@ vector<vector<string>> render(Scene& scene, Camera& camera) {
       Vector3D color = TraceRay(camera.getCameraOrigin(), rayShot, camera.getDistanceViewportCamera(), INF, RECURSION_DEPTH, scene);
       color = ColorMax(color);
       string colorToMap = to_string(int(color.getX())) + " " + to_string(int(color.getY())) + " " + to_string(int(color.getZ())) + "   ";  // colorToMap is the temporary which will take the color and map it to the map2D
-#pragma omp critical
-      map2D[y + camera.getCanvasHeight() / 2][x + camera.getCanvasWidth() / 2] = colorToMap;  // Since values tend to go to the negatives, we add the offset to map correctly to the map2D
+      map2D[y + camera.getCanvasHeight() / 2][x + camera.getCanvasWidth() / 2] = colorToMap;                                               // Since values tend to go to the negatives, we add the offset to map correctly to the map2D
     }
   }
   return map2D;

@@ -1,6 +1,8 @@
 #ifndef RAYTRACINGFUNCTIONS_H
 #define RAYTRACINGFUNCTIONS_H
 
+#include <omp.h>
+
 #include <array>
 
 #include "../Linear_Algebra/Vector3D.h"
